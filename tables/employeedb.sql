@@ -8,22 +8,22 @@ CREATE TABLE people(
     id INTEGER NOT NULL AUTO_INCREMENT,
     firstName VARCHAR (30) NOT NULL,
     lastName VARCHAR (30) NOT NULL,
-    role_id INT 
-    manager_id INT 
-    PRIMARY KEY (id)
+    FOREIGN KEY (roleID) REFERENCES roles(id), 
+    FOREIGN KEY (managerID) REFERENCES people(id),
+    PRIMARY KEY (id),
 
 );
 
 CREATE TABLE roles(
     id INT NOT NULL AUTO_INCREMENT,
     title VARCHAR (30) NOT NULL,
-    salary DECIMAL ,
-    deparment_id INT,
-    PRIMARY KEY (id)
+    salary DECIMAL,
+    FOREIGN KEY (departmentID) REFERENCES department(id),
+    PRIMARY KEY (id),
 );
 
 CREATE TABLE department(
-    id INTE NOT NULL AUTO_INCREMENT,
-    name VARCHAR(30),
+    id INT NOT NULL AUTO_INCREMENT,
+    departmentName VARCHAR(30),
     PRIMARY KEY (id)
 )
