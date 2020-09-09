@@ -1,59 +1,59 @@
 const inquirer = require("inquirer");
 const mysql = require("mysql")
-const { response } = require("express")
+
 
 const connection = mysql.createConnection({
     host: "localhost",
     port: 3306,
     user: "root",
     password: "root",
-    database: "employeedb"
+    database: "employees_db"
 });
 
-connection.connect(function (err) {
-    if (err) throw err;
-    promptUser();
-});
+promptUser();
 
 function promptUser() {
     return inquirer.prompt([
         {
-            type: "list",
+            type: "checkbox",
             message: "What would you like to do?",
             name: "prompt",
             choices: ["View All Employees", "View All Departments", "View All Roles", "Add Employee",
                 "Remove Employee", "Update Employee Role", "Update Employee Manager", "Add Department", "Remove Department", "Add role", "Remove role"]
         },
     ])
-        .then(function (resonse) {
-            if (response.prompt === "View All Employees") {
+        .then(function (response) {
+          console.log(response)
+            if (response.prompt[0] === "View All Employees") {
                 viewAllEmployees();
-                promptUser()
-            } else if (response.prompt === "View All Departments") {
+               
+            } else if (response.prompt[0] === "View All Departments") {
                 viewDepartments();
-                promptUser();
-            } else if (response.prompt === "View All Roles") {
+               
+            } else if (response.prompt[0] === "View All Roles") {
+            
                 viewRoles();
-                promptUser();
-            } else if (response.prompt === "Add Employee") {
+                
+            } else if (response.prompt[0] === "Add Employee") {
                 addEmployee();
 
-            } else if (response.prompt === "Remove Employee") {
+            } else if (response.prompt[0] === "Remove Employee") {
                 removeEmployee();
-            } else if (response.prompt === "Update Employee Role") {
+            } else if (response.prompt[0] === "Update Employee Role") {
                 updateEmployeeRole();
-            } else if (response.prompt === "Update Employee Manager") {
+            } else if (response.prompt[0] === "Update Employee Manager") {
                 updateEmployeeManager();
-            } else if (response.prompt === "Add Department") {
+            } else if (response.prompt[0] === "Add Department") {
                 addDepartment();
-            } else if (response.prompt === "Remove Department") {
+            } else if (response.prompt[0] === "Remove Department") {
                 removeDepartment();
-            } else if (response.prompt === "Add role") {
+            } else if (response.prompt[0] === "Add role") {
                 addRole();
             } else {
                 removeRole();
             }
         })
+
     }
     const addEmployee = () => {
         return inquirer.prompt([
@@ -72,25 +72,25 @@ function promptUser() {
                 message: "What is the employee's role?",
                 choices: ["Sales Lead", "Sales Person", "Lead Engineer", "Software Engineer", "Account Manager", "Accountant", "Legal Team Lead", "Lawyer"],
                 name: "newEmployeeRole"
-                /// how to pull from database
+                /// how to pull from database?
             },
-            // {
-            //     type: "List",
-            //     message: "Who is the employee's manager?",
-            //     name: "newEmployeeManager",
-            //     choices: figure out a way to pull in all current employees. Either add them to an array of all employees, or figure out a way to do this wit hsql
+             {
+                type: "checkbox",
+                message: "What is their manager's ID#?",
+                name: "newEmployeeManager",
+                choices: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
 
-            // }
+             }
 
         ]).then(function(response){
             console.log(response)
             connection.query(
-                "INSERT INTO employeedb SET people",
+                "INSERT INTO employees_db SET people",
                 {
                     firstName: response.newEmployeeFirstName,
                     lastName: response.newEmployeeLastName,
-                    role: newEmployeeRole,
-                    manager: newEmployeeManager,
+                    roleID: response.newEmployeeRole,
+                    managerID: response.newEmployeeManager,
                 }, 
                 function(err){
                     if (err) throw err;
@@ -134,6 +134,57 @@ function promptUser() {
       }
 
       //updateEmployeeRole
+      const updateEmployeeRole = () => {
+        inquirer.prompt ([
+          {
+            type: "list",
+            name: "empChoice",
+            message: "Which employee would you like to update the role of?",
+            choices: [1, 2, 3, 4, 5, 6, 7]
+          },
+          {
+            type: "list",
+            name: "updateRole",
+            message: "What role would you like to assign?",
+            choices: [1, 2, 3, 4, 5, 6, 7, 8]        
+            }
+      
+        ]).then(function(response){
+          connection.query(
+            `UPDATE people SET roleID = ${response.updateRole} WHERE id = ${response.empChoice}`,
+            console.log("Employee Role Updated")
+          )
+          promptUser();
+        })
+        
+        
+      }
+      const updateEmployeeManager = () => {
+        inquirer.prompt ([
+          {
+            type: "list",
+            name: "empChoice",
+            message: "Which employee would you like to update the manager of?",
+            choices: [1, 2, 3, 4, 5, 6, 7]
+          },
+          {
+            type: "list",
+            name: "updateManager",
+            message: "Which manager would you like to assign?",
+            choices: [1, 2, 3, 4, 5, 6, 7, 8]        
+            }
+      
+        ]).then(function(response){
+          connection.query(
+            `UPDATE people SET roleID = ${response.updateManager} WHERE id = ${response.empChoice}`,
+            console.log("Employee Role Updated")
+          )
+          promptUser();
+        })
+        
+        
+      }
+      
       //updateEmployeeManager
       
     const addDepartment = () => {
@@ -187,7 +238,7 @@ function promptUser() {
               `DELETE FROM department WHERE departmentName='${chosenDept.departmentName}'`
                 )
               console.log(`${chosenDept.departmentName} has been removed from departments!`);
-              start();
+              promptUser();
           })
         })
       }
@@ -226,7 +277,7 @@ function promptUser() {
         })
       }
       const removeRole = () => {
-        connection.query("SELECT * FROM role", function(err, results){
+        connection.query("SELECT * FROM roles", function(err, results){
           if(err) throw err;
           inquirer.prompt([
             {
@@ -263,21 +314,24 @@ function promptUser() {
           if (err) throw err;
           console.log("------------------------------------------------------");
           console.table(res);
+          promptUser()
         }
         )
      };
      const viewDepartments = () => {
-        connection.query("SELECT * FROM departments", function(err, res){
+        connection.query("SELECT * FROM department", function(err, res){
           if(err) throw err;
           console.log("-------------------------------------------------------");
           console.table(res);
+          promptUser()
         })
       }
       const viewRoles = () => {
-        connection.query("SELECT * FROM role", function(err, res){
+        connection.query("SELECT * FROM roles", function(err, res){
           if(err) throw err;
           console.log("-------------------------------------------------------");
           console.table(res);
+          promptUser()
         })
       }
       
