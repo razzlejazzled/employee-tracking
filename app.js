@@ -177,7 +177,7 @@ function promptUser() {
         ]).then(function(response){
           connection.query(
             `UPDATE people SET roleID = ${response.updateManager} WHERE id = ${response.empChoice}`,
-            console.log("Employee Role Updated")
+            console.log("Employee Manager Updated")
           )
           promptUser();
         })
@@ -185,7 +185,7 @@ function promptUser() {
         
       }
       
-      //updateEmployeeManager
+    
       
     const addDepartment = () => {
         inquirer.prompt([
