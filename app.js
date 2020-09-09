@@ -326,6 +326,8 @@ const removeRole = () => {
           `DELETE FROM role WHERE title='${chosenRole.title}'`
         )
         console.log(`${chosenRole.title} has been removed from roles!`);
+        
+      }).then(function(){
         promptUser();
       })
   })
